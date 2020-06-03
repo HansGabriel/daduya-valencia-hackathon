@@ -2,3 +2,4 @@ flask
 redis
 flask-socketio
 wit
+gunicorn
