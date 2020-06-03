@@ -1,2 +1,4 @@
 venv/
 __pycache__
+static/main.css.map
+static/main.scss

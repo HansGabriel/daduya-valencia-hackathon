@@ -110,12 +110,14 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
     elif json["data"] == "message":
         socketio.emit('my response', json, callback=messageReceived)
         resp = client.message(json["message"])
+        print(resp)
         if resp['intents'][0]['name'] == "greeting":
             msg["user_name"] = "Steve"
             msg["message"] = "Hello there Human"
         elif resp['intents'][0]['name'] == "infected_get":
             msg["user_name"] = "Steve"
             code = matchingCountry(resp['entities']['country:country'][0]['body'])
+            print(code)
             data = get("https://api.apify.com/v2/key-value-stores/" + code + "/records/LATEST?disableRedirect=true")
             msg["message"] = str(data['infected'])
         socketio.emit('my response', msg, callback=messageReceived)
