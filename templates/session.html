@@ -1,108 +1,25 @@
-<!DOCTYPE html>
+
+  <!DOCTYPE html>
   <html lang="en">
   <head>
     <title>Flask_Chat_App</title>
-    <link rel="stylesheet" href="../static/main.css">
   </head>
   <body>
-        <div class="chat">
-          <div class="chat-header clearfix">
-            <img src="https://s3.ap-south-1.amazonaws.com/techleer/230.jpg" alt="avatar" />
-          
-          <div class="chat-about">
-            <div class="chat-with">Covid Chat Bot</div>
-            <div class="chat-num-messages">Ask me anything related to covid data</div>
-          </div>
-          <i class="fa fa-star"></i>
-        </div> <!-- end chat-header -->
-        
-        <div class="chat-history">
-          <ul id="unl">
-            <li class="clearfix">
-              <div class="message-data align-right">
-                <span class="message-data-time" >10:10 AM, Today</span> &nbsp; &nbsp;
-                <span class="message-data-name" >Olia</span> <i class="fa fa-circle me"></i>
-                
-              </div>
-              <div class="message other-message float-right">
-                Hi Vincent, how are you? How is the project coming along?
-              </div>
-            </li>
-            
-            <li>
-              <div class="message-data">
-                <span class="message-data-name"><i class="fa fa-circle online"></i> Vincent</span>
-                <span class="message-data-time">10:12 AM, Today</span>
-              </div>
-              <div class="message my-message">
-                Are we meeting today? Project has been already finished and I have results to show you.
-              </div>
-            </li>
-            
-            <li class="clearfix">
-              <div class="message-data align-right">
-                <span class="message-data-time" >10:14 AM, Today</span> &nbsp; &nbsp;
-                <span class="message-data-name" >Olia</span> <i class="fa fa-circle me"></i>
-                
-              </div>
-              <div class="message other-message float-right">
-                Well I am not sure. The rest of the team is not here yet. Maybe in an hour or so? Have you faced any problems at the last phase of the project?
-              </div>
-            </li>
-            
-            <li>
-              <div class="message-data">
-                <span class="message-data-name"><i class="fa fa-circle online"></i> Vincent</span>
-                <span class="message-data-time">10:20 AM, Today</span>
-              </div>
-              <div class="message my-message">
-                Actually everything was fine. I'm very excited to show this to our team.
-              </div>
-            </li>
-            
-          </ul>
-          
-        </div> <!-- end chat-history -->
-        
-        <form action="" method='POST'>
-          <div class="chat-message clearfix">
-            <textarea name="message-to-send" id="message-to-send" placeholder ="Type your message" rows="3"></textarea>
-                    
-            <i class="fa fa-file-o"></i> &nbsp;&nbsp;&nbsp;
-            <i class="fa fa-file-image-o"></i>
-            
-            <button>Send</button>
-          </div>
-        </form>
-      </div>
 
-      <li class="clearfix" id='message_human' style="display:none">
-        <div class="message-data align-right">
-          <span class="message-data-time" >10:14 AM, Today</span> &nbsp; &nbsp;
-          <span class="message-data-name" >Olia</span> <i class="fa fa-circle me"></i>
-          
-        </div>
-        <div class="message other-message float-right">
-          Well I am not sure. The rest of the team is not here yet. Maybe in an hour or so? Have you faced any problems at the last phase of the project?
-        </div>
-      </li>
-        
-      <li id='message_bot' style="display:none">
-        <div class="message-data">
-          <span class="message-data-name"><i class="fa fa-circle online"></i> Vincent</span>
-          <span class="message-data-time">10:12 AM, Today</span>
-        </div>
-        <div class="message my-message">
-          Are we meeting today? Project has been already finished and I have results to show you.
-        </div>
-      </li>
-      
+    <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
+    <div class="message_holder"></div>
+
+    <form action="" method="POST">
+      <input type="text" class="username" placeholder="User Name"/>
+      <input type="text" class="message" placeholder="Messages"/>
+      <input type="submit"/>
+    </form>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script type="text/javascript">
-      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
 
       socket.on( 'connect', function() {
         socket.emit( 'my event', {
@@ -110,36 +27,23 @@
         } )
         var form = $( 'form' ).on( 'submit', function( e ) {
           e.preventDefault()
-          let user_name = "Hans"
-          let user_input = $( 'textarea' ).val()
-          console.log(user_input)
+          let user_name = $( 'input.username' ).val()
+          let user_input = $( 'input.message' ).val()
           socket.emit( 'my event', {
             user_name : user_name,
-            message : user_input,
-            data: "message"
+            message : user_input
           } )
-          $( 'textarea' ).val( '' ).focus()
+          $( 'input.message' ).val( '' ).focus()
         } )
       } )
       socket.on( 'my response', function( msg ) {
         console.log( msg )
         if( typeof msg.user_name !== 'undefined' ) {
-          // $( 'h3' ).remove()
-          // $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div> <div><b style="color: #000">'+msg.bot_name+'</b> '+msg.bot_message+'</div>' )
-          // $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
-          if (msg.user_name === "Steve") {
-            var newDiv = $("#message_bot").clone();
-            newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
-            newDiv.show()
-          } else {
-            var newDiv = $("#message_human").clone();
-            newDiv.attr("id","whatever").appendTo('ul').find(".other-message").html(msg.message);
-            newDiv.show()
-          }
+          $( 'h3' ).remove()
+          $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
         }
       })
     </script>
-    <!-- <script src="../js/index.js"></script> -->
 
   </body>
   </html>
