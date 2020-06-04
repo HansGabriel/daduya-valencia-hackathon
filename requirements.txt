@@ -3,3 +3,4 @@ redis
 flask-socketio
 wit
 gunicorn
+eventlet
