@@ -7,6 +7,7 @@ import requests
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socketio = SocketIO(app, cors_allowed_origins='*')
+# socketio = SocketIO(app)
 client = Wit("2XWTIKVOL6RTJLGCQQ7OXDG6YQVBCTMH")
 
 
@@ -61,11 +62,6 @@ countries = {
     'Vietnam': 'EaCBL1JNntjR3EakU'
 }
 
-
-@app.route('/')
-def sessions():
-    return render_template('session.html')
-
 def messageReceived(methods=['GET', 'POST']):
     print('message was received!!!')
 
@@ -88,6 +84,12 @@ def matchingCountry(word):
             ans = key
     return countries[ans]
 
+
+
+@app.route('/')
+def sessions():
+    return render_template('session.html')
+
 @socketio.on('my event')
 def handle_my_custom_event(json, methods=['GET', 'POST']):
     # print('received my event: ' + str(json))
@@ -107,7 +109,19 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
             code = matchingCountry(resp['entities']['country:country'][0]['body'])
             print(code)
             data = get("https://api.apify.com/v2/key-value-stores/" + code + "/records/LATEST?disableRedirect=true")
-            msg["message"] = str(data['infected'])
+            if 'sourceUrl' in data:
+                msg["message"] = 'The number of current infected patients are ' + str(data['infected']) + ' and the source is from ' + str(data['sourceUrl'])
+            else:
+                msg["message"] = 'The number of current infected patients are ' + str(data['infected'])
+        elif resp['intents'][0]['name'] == "dead_get":
+            print('hello')
+            msg['user_name'] = 'Steve'
+            code = matchingCountry(resp['entities']['country:country'][0]['body'])
+            data = get("https://api.apify.com/v2/key-value-stores/" + code + "/records/LATEST?disableRedirect=true")
+            if 'sourceUrl' in data:
+                msg["message"] = 'The total number of deaths are ' + str(data['deceased']) + ' and the source is from ' + str(data['sourceUrl'])
+            else:
+                msg["message"] = 'The total number of deaths are ' + str(data['deceased'])
         socketio.emit('my response', msg, callback=messageReceived)
 
 if __name__ == '__main__':
