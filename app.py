@@ -2,7 +2,7 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 from wit import Wit
 from difflib import SequenceMatcher
-from newsapi import NewsApiClient
+# from newsapi import NewsApiClient
 from random import randint
 import requests
 
@@ -11,7 +11,7 @@ app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socketio = SocketIO(app, cors_allowed_origins='*')
 # socketio = SocketIO(app)
 client = Wit("2XWTIKVOL6RTJLGCQQ7OXDG6YQVBCTMH")
-newsapi = NewsApiClient(api_key='6ff0985bb0e148b99df16d5b4edc7327')
+# newsapi = NewsApiClient(api_key='6ff0985bb0e148b99df16d5b4edc7327')
 
 # dictionary for countries to api code
 countries = {
@@ -152,29 +152,29 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
                 msg["message"] = 'The total number of deaths are ' + str(data['deceased']) + ' and the source is from ' + str(data['sourceUrl'])
             else:
                 msg["message"] = 'The total number of deaths are ' + str(data['deceased'])
-        elif resp['intents'][0]['name'] == 'news_get':
-            msg['user_name'] = 'Steve'
-            print(msg)
-            roles = getRoles(resp)
-            for key in roles:
-                if key == "news:topic":
-                    topic = roles[key]
-                    print(topic)
-                elif key == "news:source":
-                    source = roles[key]
-                    source = matchingNews(source)
-                    print(source)
-            print(topic, source)
-            news = newsapi.get_top_headlines(q=topic,sources=source,language='en')
-            if news['totalResults'] == 0:
-                article = allCovidNews()
-                msg['user_name'] = 'Steve'
-                msg["message"] = "I don't have news for that source but here's what I found: " + article['url'] + '\n' + article['title']
-                msg["type"] = "news"
-                msg["img"] = article["urlToImage"]
-            else:
-                msg['user_name'] = 'Steve'
-                msg["message"] = 'Here is what I got from ' + source + '. This is from ' + news['url'] + '.' + news['content'][:100]
+        # elif resp['intents'][0]['name'] == 'news_get':
+        #     msg['user_name'] = 'Steve'
+        #     print(msg)
+        #     roles = getRoles(resp)
+        #     for key in roles:
+        #         if key == "news:topic":
+        #             topic = roles[key]
+        #             print(topic)
+        #         elif key == "news:source":
+        #             source = roles[key]
+        #             source = matchingNews(source)
+        #             print(source)
+        #     print(topic, source)
+        #     news = newsapi.get_top_headlines(q=topic,sources=source,language='en')
+        #     if news['totalResults'] == 0:
+        #         article = allCovidNews()
+        #         msg['user_name'] = 'Steve'
+        #         msg["message"] = "I don't have news for that source but here's what I found: " + article['url'] + '\n' + article['title']
+        #         msg["type"] = "news"
+        #         msg["img"] = article["urlToImage"]
+        #     else:
+        #         msg['user_name'] = 'Steve'
+        #         msg["message"] = 'Here is what I got from ' + source + '. This is from ' + news['url'] + '.' + news['content'][:100]
         socketio.emit('my response', msg, callback=messageReceived)
 
 if __name__ == '__main__':
