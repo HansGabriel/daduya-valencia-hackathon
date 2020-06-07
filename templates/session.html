@@ -18,7 +18,6 @@
         
         <div class="chat-history">
           <ul id="unl">
-            
             <li>
               <div class="message-data">
                 <span class="message-data-name"><i class="fa fa-circle online"></i> Covid Bot</span>
@@ -44,6 +43,19 @@
           </div>
         </form>
       </div>
+
+      <li id='message_bot_image' style="display:none;">
+        <div class="message-data">
+          <span class="message-data-name"><i class="fa fa-circle online"></i> Covid Bot</span>
+          <span class="message-data-time">10:12 AM, Today</span>
+        </div>
+        <div class="message my-message">
+          Are we meeting today? Project has been already finished and I have results to show you.
+        </div>
+        <div class="img_picture">
+            <img id="url_img" src="https://www.hindustantimes.com/rf/image_size_960x540/HT/p2/2020/06/07/Pictures/ajay-maken-press-conference_49ebef9e-a8ac-11ea-b9e4-8ce809f9739c.jpg" alt="sample" />
+        </div>
+      </li>
 
       <li class="clearfix" id='message_human' style="display:none">
         <div class="message-data align-right">
@@ -71,14 +83,18 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script type="text/javascript">
-      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
-      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
+      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
       socket.on( 'connect', function() {
         socket.emit( 'my event', {
           data: 'User Connected'
         } )
         var form = $( 'form' ).on( 'submit', function( e ) {
           e.preventDefault()
+          if ($('#message-to-send').val().length == 0) {
+            $( 'textarea' ).val( '' ).focus()
+            return;
+          }
           let user_name = "Hans"
           let user_input = $( 'textarea' ).val()
           console.log(user_input)
@@ -94,10 +110,18 @@
         console.log( msg )
         if( typeof msg.user_name !== 'undefined' ) {
           if (msg.user_name === "Steve") {
-            var newDiv = $("#message_bot").clone();
-            newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
-            newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
-            newDiv.show()
+            if (msg.type === "news") {
+              var newDiv = $("#message_bot_image").clone();
+              newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
+              newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
+              newDiv.find(".url_img").attr("src", msg.img)
+              newDiv.show()
+            } else {
+              var newDiv = $("#message_bot").clone();
+              newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
+              newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
+              newDiv.show()
+            }
           } else {
             var newDiv = $("#message_human").clone();
             newDiv.attr("id","whatever").appendTo('ul').find(".other-message").html(msg.message);
