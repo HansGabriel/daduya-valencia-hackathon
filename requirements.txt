@@ -3,4 +3,3 @@ flask-socketio
 wit
 gunicorn
 eventlet
-newsapi

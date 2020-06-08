@@ -2,8 +2,6 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 from wit import Wit
 from difflib import SequenceMatcher
-# from newsapi import NewsApiClient
-from random import randint
 import requests
 
 app = Flask(__name__)
@@ -11,7 +9,6 @@ app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socketio = SocketIO(app, cors_allowed_origins='*')
 # socketio = SocketIO(app)
 client = Wit("2XWTIKVOL6RTJLGCQQ7OXDG6YQVBCTMH")
-# newsapi = NewsApiClient(api_key='6ff0985bb0e148b99df16d5b4edc7327')
 
 # dictionary for countries to api code
 countries = {
@@ -86,36 +83,6 @@ def matchingCountry(word):
             ans = key
     return countries[ans]
 
-def getRoles(message):
-    ans = {}
-    data = message['entities']
-    for key in data:
-        ans[key] = data[key][0]['body']
-    return ans
-
-def matchingNews(source):
-    ans = ""
-    score = 0
-    sources = newsapi.get_sources()
-    for i in range(len(sources['sources'])):
-        if similar(sources['sources'][i]['id'], source) > score:
-            score = similar(sources['sources'][i]['id'], source)
-            ans = sources['sources'][i]['id']
-    return ans
-
-def allCovidNews():
-    line = ""
-    sources = newsapi.get_sources()
-    for i in range(len(sources['sources'])):
-        line += sources['sources'][i]['id'] + ","
-    news = newsapi.get_top_headlines(q='covid',sources=line,language='en')
-    value = randint(0, len(news['articles']) - 1)
-    article = news['articles'][value]
-    return article
-
-
-    
-
 @app.route('/')
 def sessions():
     return render_template('session.html')
@@ -124,7 +91,7 @@ def sessions():
 def handle_my_custom_event(json, methods=['GET', 'POST']):
     # print('received my event: ' + str(json))
     # socketio.emit('my response', json, callback=messageReceived)
-    msg = {"user_name": "", "message": "", "type": "", "img": ""}
+    msg = {"user_name": "", "message": ""}
     if json["data"] == "User Connected":
         socketio.emit('my response', json, callback=messageReceived)
     elif json["data"] == "message":
@@ -152,29 +119,6 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
                 msg["message"] = 'The total number of deaths are ' + str(data['deceased']) + ' and the source is from ' + str(data['sourceUrl'])
             else:
                 msg["message"] = 'The total number of deaths are ' + str(data['deceased'])
-        # elif resp['intents'][0]['name'] == 'news_get':
-        #     msg['user_name'] = 'Steve'
-        #     print(msg)
-        #     roles = getRoles(resp)
-        #     for key in roles:
-        #         if key == "news:topic":
-        #             topic = roles[key]
-        #             print(topic)
-        #         elif key == "news:source":
-        #             source = roles[key]
-        #             source = matchingNews(source)
-        #             print(source)
-        #     print(topic, source)
-        #     news = newsapi.get_top_headlines(q=topic,sources=source,language='en')
-        #     if news['totalResults'] == 0:
-        #         article = allCovidNews()
-        #         msg['user_name'] = 'Steve'
-        #         msg["message"] = "I don't have news for that source but here's what I found: " + article['url'] + '\n' + article['title']
-        #         msg["type"] = "news"
-        #         msg["img"] = article["urlToImage"]
-        #     else:
-        #         msg['user_name'] = 'Steve'
-        #         msg["message"] = 'Here is what I got from ' + source + '. This is from ' + news['url'] + '.' + news['content'][:100]
         socketio.emit('my response', msg, callback=messageReceived)
 
 if __name__ == '__main__':
