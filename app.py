@@ -6,60 +6,9 @@ import requests
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
-socketio = SocketIO(app, cors_allowed_origins='*')
-# socketio = SocketIO(app)
+# socketio = SocketIO(app, cors_allowed_origins='*')
+socketio = SocketIO(app)
 client = Wit("2XWTIKVOL6RTJLGCQQ7OXDG6YQVBCTMH")
-
-# dictionary for countries to api code
-countries = {
-    'Algeria': 'pp4Wo2slUJ78ZnaAi',
-    'Austria': 'RJtyHLXtCepb4aYxB',
-    'Azerbaijan': 'ThmCW2NVnrLa0tVp5',
-    'Bahrain': 'c7Bc6QnnwaPLOMv3J',
-    'Belgium': 'apVM8aZ8hKZFvnKm7',
-    'Brazil': 'TyToNta7jGKkpszMZ',
-    'Bulgaria': 'np4eYah8M5uQtj0Su',
-    'Canada': 'fabbocwKrtxSDf96h',
-    'China': 'x4iHxk7TVGI7UxFv6',
-    'Czech_Republic': 'K373S4uCFR9W1K8ei',
-    'Denmark': 'EAlpwScH29Qa5m60g',
-    'Estonia': 'AZUhwS51lBBg26wSG',
-    'Finland': 'jEFt5tgCTMfjJpLD3',
-    'France': 'ufVgKLP8ljtn3ufaU',
-    'Germany': 'OHrZyNo9BzT6xKMRD',
-    'Hungary': 'RGEUeKe60NjU16Edo',
-    'India': 'toDWvRj1JpTXiM8FF',
-    'Iran': 'XV4DWf1ctkSPA8H99',
-    'Italy': 'UFpnR8mukiu0TSrb4',
-    'Japan': 'YbboJrL3cgVfkV1am',
-    'Kosovo': 'C10heVVVE8yBd1YvF',
-    'Lithuania': 'xhGDb8VTqjtm1AQL6',
-    'Luxembourg': 'RVkUl1Y7FZn3Y410K',
-    'Malaysia': '6t65lJVfs3d8s6aKc',
-    'Netherlands': 'vqnEUe7VtKNMqGqFF',
-    'Nigeria': 'Eb694wt67UxjdSGbc',
-    'Norway': '3qlmMu1XN2ZLoVIQt',
-    'Pakistan': 'QhfG8Kj6tVYMgud6R',
-    'Palestine': 'SbribCOVf2wgR868y',
-    'Philippines': 'lFItbkoNDXKeSWBBA',
-    'Poland': '3Po6TV7wTht4vIEid',
-    'Portugal': 'BXGEYTTUQzYBboEQK',
-    'Romania': 'KUlj8EGfDGHiB0gU1',
-    'Russia': '1brJ0NLbQaJKPTWMO',
-    'Saudi_Arabia': '40xwYCZ57p5OkyBIJ',
-    'Serbia': 'aHENGKUPUhKlX97aL',
-    'Singapore': 'yaPbKe9e5Et61bl7W',
-    'Slovakia': 'GlTLAdXAuOz6bLAIO',
-    'Slovenia': '603AyvQ8QjyqmnZx6',
-    'South_Korea': 'TMFbhs7qtXpGpeaeP',
-    'Spain': 'lluBbYoQVN65R3BGO',
-    'Sweden': '8mRFdwyukavRNCr42',
-    'Switzerland': 'lDegAca820XgvjE0C',
-    'Turkey': '28ljlt47S5XEd1qIi',
-    'United_Kingdom': 'KWLojgM5r1JmMW4b4',
-    'United_States': 'moxA3Q0aZh5LosewB',
-    'Vietnam': 'EaCBL1JNntjR3EakU'
-}
 
 def messageReceived(methods=['GET', 'POST']):
     print('message was received!!!')
@@ -83,6 +32,19 @@ def matchingCountry(word):
             ans = key
     return countries[ans]
 
+def matchinCountry2(word, arr):
+    ans = 0
+    score = 0
+    for i in range(len(arr)):
+        if similar(word, arr[i]["Country"]) > score:
+            score = similar(word, arr[i]["Country"])
+            ans = i
+    return arr[ans]
+
+def findCountry(country, countries):
+    pass
+
+
 @app.route('/')
 def sessions():
     return render_template('session.html')
@@ -91,7 +53,7 @@ def sessions():
 def handle_my_custom_event(json, methods=['GET', 'POST']):
     # print('received my event: ' + str(json))
     # socketio.emit('my response', json, callback=messageReceived)
-    msg = {"user_name": "", "message": ""}
+    msg = {"user_name": "", "message": "", "data": [], "labels": []}
     if json["data"] == "User Connected":
         socketio.emit('my response', json, callback=messageReceived)
     elif json["data"] == "message":
@@ -103,22 +65,63 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
             msg["message"] = "Hello there Human"
         elif resp['intents'][0]['name'] == "infected_get":
             msg["user_name"] = "Steve"
-            code = matchingCountry(resp['entities']['country:country'][0]['body'])
-            print(code)
-            data = get("https://api.apify.com/v2/key-value-stores/" + code + "/records/LATEST?disableRedirect=true")
-            if 'sourceUrl' in data:
-                msg["message"] = 'The number of current infected patients are ' + str(data['infected']) + ' and the source is from ' + str(data['sourceUrl'])
-            else:
-                msg["message"] = 'The number of current infected patients are ' + str(data['infected'])
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of new confirmed cases in " + ans["Country"] + " is " + str(ans["NewConfirmed"])
+
         elif resp['intents'][0]['name'] == "dead_get":
-            print('hello')
-            msg['user_name'] = 'Steve'
-            code = matchingCountry(resp['entities']['country:country'][0]['body'])
-            data = get("https://api.apify.com/v2/key-value-stores/" + code + "/records/LATEST?disableRedirect=true")
-            if 'sourceUrl' in data:
-                msg["message"] = 'The total number of deaths are ' + str(data['deceased']) + ' and the source is from ' + str(data['sourceUrl'])
-            else:
-                msg["message"] = 'The total number of deaths are ' + str(data['deceased'])
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of new confirmed deaths in " + ans["Country"] + " is " + str(ans["NewDeaths"])
+
+        elif resp['intents'][0]['name'] == "recoveries_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of new confirmed recoveries in " + ans["Country"] + " is " + str(ans["NewRecovered"])
+
+        elif resp['intents'][0]['name'] == "infected_total_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of total confirmed infected cases in " + ans["Country"] + " is " + str(ans["TotalConfirmed"])
+        elif resp['intents'][0]['name'] == "dead_total_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of total confirmed dead cases in " + ans["Country"] + " is " + str(ans["TotalDeaths"])
+        elif resp['intents'][0]['name'] == "recoveries_total_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of total confirmed recovered cases in " + ans["Country"] + " is " + str(ans["TotalRecovered"])
+        elif resp['intents'][0]['name'] == "graph_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            slug = ans["Slug"]
+            timedata = get("https://api.covid19api.com/total/dayone/country/" + slug)
+            if 'status:Recovered' in resp['entities']:
+                for i in range(len(timedata)):
+                    msg["data"].append(timedata[i]['Recovered'])
+                    msg["labels"].append('1')
+            elif 'status:Confirmed' in resp['entities']:
+                for i in range(len(timedata)):
+                    msg["data"].append(timedata[i]['Confirmed'])
+                    msg["labels"].append('1')
+            elif 'status:Deaths' in resp['entities']:
+                for i in range(len(timedata)):
+                    msg["data"].append(timedata[i]['Deaths'])
+                    msg["labels"].append('1')
+            msg["message"] = "Data Stored"
         socketio.emit('my response', msg, callback=messageReceived)
 
 if __name__ == '__main__':

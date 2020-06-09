@@ -27,6 +27,16 @@
                 How may I help you!
               </div>
             </li>
+
+            <li>
+              <div class="message-data">
+                <span class="message-data-name"><i class="fa fa-circle online"></i> Covid Bot</span>
+                <span class="message-data-time">10:12 AM, Today</span>
+              </div>
+              <div class="message my-message">
+                <canvas id="myChart"></canvas>
+              </div>
+            </li>
             
           </ul>
           
@@ -43,6 +53,17 @@
           </div>
         </form>
       </div>
+
+      <li style="display:none" id="graph_bot"> 
+        <div class="message-data">
+          <span class="message-data-name"><i class="fa fa-circle online"></i> Covid Bot</span>
+          <span class="message-data-time">10:12 AM, Today</span>
+        </div>
+        <div class="message my-message">
+          How may I help you!
+          <canvas id="myChart"></canvas>
+        </div>
+      </li>
 
       <li class="clearfix" id='message_human' style="display:none">
         <div class="message-data align-right">
@@ -69,9 +90,76 @@
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script type="text/javascript">
-      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
-      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
+      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+      var ctx = document.getElementById('myChart').getContext('2d');
+      // var chart = new Chart(ctx, {
+      //     // The type of chart we want to create
+      //     type: 'line',
+
+      //     // The data for our dataset
+      //     data: {
+      //         labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'],
+      //         datasets: [{
+      //             label: 'My First dataset',
+      //             backgroundColor: 'rgb(255, 99, 132)',
+      //             borderColor: 'rgb(255, 99, 132)',
+      //             data: [0, 10, 5, 2, 20, 30, 45, 100]
+      //         }]
+      //     },
+
+      //     // Configuration options go here
+      //     options: {}
+      // });
+
+      // var myPieChart = new Chart(ctx, {
+      //     type: 'pie',
+      //     data: {
+      //       datasets: [{
+      //           data: [10, 20, 30],
+      //           backgroundColor: 'rgb(255, 99, 132)',
+      //       }],
+
+      //       // These labels appear in the legend and in the tooltips when hovering different arcs
+      //       labels: [
+      //           'Red',
+      //           'Yellow',
+      //           'Blue'
+      //       ]
+      //     },
+      //     options: {}
+      // });
+
+      var stackedBar = new Chart(ctx, {
+          type: 'line',
+          data: {
+            datasets: [{
+                data: [10000, 20000, 300],
+                backgroundColor: 'rgb(255, 99, 132)',
+            }],
+
+            // These labels appear in the legend and in the tooltips when hovering different arcs
+            labels: [
+                'Red',
+                'Yellow',
+                'Blue'
+            ]
+          },
+          options: {
+              scales: {
+                  xAxes: [{
+                      stacked: true
+                  }],
+                  yAxes: [{
+                      stacked: true
+                  }]
+              }
+          }
+      });
+
+
       socket.on( 'connect', function() {
         socket.emit( 'my event', {
           data: 'User Connected'
@@ -97,10 +185,50 @@
         console.log( msg )
         if( typeof msg.user_name !== 'undefined' ) {
           if (msg.user_name === "Steve") {
-            var newDiv = $("#message_bot").clone();
-            newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
-            newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
-            newDiv.show()
+            if (msg.data.length > 0) {
+              var newDiv = $("#graph_bot").clone();
+              newDiv.attr("id","whatever").appendTo('ul')
+              newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
+              var ctx = document.getElementById('myChart').getContext('2d');
+              var stackedBar = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                  datasets: [{
+                      // data: [10000, 20000, 300],
+                      data: msg.data.slice(msg.data.length - 10, msg.data.length - 1),
+                      backgroundColor: 'rgb(255, 99, 132)',
+                  }],
+
+                  // // These labels appear in the legend and in the tooltips when hovering different arcs
+                  // labels: [
+                  //     'Math',
+                  //     'Science',
+                  //     'English'
+                  // ]
+                  label: msg.labels.slice(msg.data.length - 10, msg.data.length - 1)
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            stacked: true
+                        }],
+                        yAxes: [{
+                            stacked: true
+                        }]
+                    }
+                }
+            });
+              var canvas = $("#myChart")
+              canvas.attr('id', 'whatever')
+              newDiv.show()
+            }
+            else {
+              newDiv.show()
+              var newDiv = $("#message_bot").clone();
+              newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
+              newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
+              newDiv.show()
+            }
           } else {
             var newDiv = $("#message_human").clone();
             newDiv.attr("id","whatever").appendTo('ul').find(".other-message").html(msg.message);
