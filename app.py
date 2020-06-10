@@ -2,11 +2,12 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 from wit import Wit
 from difflib import SequenceMatcher
+import datetime
 import requests
 
 app = Flask(__name__)
-# app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
-socketio = SocketIO(app, cors_allowed_origins='*')
+app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
+# socketio = SocketIO(app, cors_allowed_origins='*')
 # socketio = SocketIO(app)
 client = Wit("2XWTIKVOL6RTJLGCQQ7OXDG6YQVBCTMH")
 
@@ -41,9 +42,10 @@ def matchinCountry2(word, arr):
             ans = i
     return arr[ans]
 
-def findCountry(country, countries):
-    pass
-
+def numToMonth(num):
+    datetime_object = datetime.datetime.strptime(num, "%m")
+    month_name = datetime_object.strftime("%b")
+    return month_name
 
 @app.route('/')
 def sessions():
@@ -51,8 +53,6 @@ def sessions():
 
 @socketio.on('my event')
 def handle_my_custom_event(json, methods=['GET', 'POST']):
-    # print('received my event: ' + str(json))
-    # socketio.emit('my response', json, callback=messageReceived)
     msg = {"user_name": "", "message": "", "data": [], "labels": []}
     if json["data"] == "User Connected":
         socketio.emit('my response', json, callback=messageReceived)
@@ -63,6 +63,9 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
         if resp['intents'][0]['name'] == "greeting":
             msg["user_name"] = "Steve"
             msg["message"] = "Hello there Human"
+        elif resp['intents'][0]['name'] == "bye":
+            msg["user_name"] = "Steve"
+            msg["message"] = "Good bye, see you next time"
         elif resp['intents'][0]['name'] == "infected_get":
             msg["user_name"] = "Steve"
             data = get("https://api.covid19api.com/summary")
@@ -108,20 +111,40 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
             arr = data["Countries"]
             ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
             slug = ans["Slug"]
-            timedata = get("https://api.covid19api.com/total/dayone/country/" + slug)
+            print(slug)
+            timedata = get("https://api.covid19api.com/dayone/country/" + slug)
+            status = ""
             if 'status:Recovered' in resp['entities']:
-                for i in range(len(timedata)):
+                i = 0
+                while i < len(timedata):
                     msg["data"].append(timedata[i]['Recovered'])
-                    msg["labels"].append('1')
+                    date = timedata[i]['Date']
+                    month = numToMonth(date[5:7])
+                    day = date[8:10]
+                    msg["labels"].append(str(month) + " " + str(day))
+                    i+=10
+                    status = "recoveries"
             elif 'status:Confirmed' in resp['entities']:
-                for i in range(len(timedata)):
+                i = 0
+                while i < len(timedata):
                     msg["data"].append(timedata[i]['Confirmed'])
-                    msg["labels"].append('1')
+                    date = timedata[i]['Date']
+                    month = numToMonth(date[5:7])
+                    day = date[8:10]
+                    msg["labels"].append(str(month) + " " + str(day))
+                    i+=10
+                    status = "infected"
             elif 'status:Deaths' in resp['entities']:
-                for i in range(len(timedata)):
+                i = 0
+                while i < len(timedata):
                     msg["data"].append(timedata[i]['Deaths'])
-                    msg["labels"].append('1')
-            msg["message"] = "Data Stored"
+                    date = timedata[i]['Date']
+                    month = numToMonth(date[5:7])
+                    day = date[8:10]
+                    msg["labels"].append(str(month) + " " + str(day))
+                    i+=10
+                    status = "deaths"
+            msg["message"] = "Total " + status + " in " + slug
         socketio.emit('my response', msg, callback=messageReceived)
 
 if __name__ == '__main__':

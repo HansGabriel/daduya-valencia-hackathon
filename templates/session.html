@@ -28,7 +28,7 @@
               </div>
             </li>
 
-            <li>
+            <!-- <li>
               <div class="message-data">
                 <span class="message-data-name"><i class="fa fa-circle online"></i> Covid Bot</span>
                 <span class="message-data-time">10:12 AM, Today</span>
@@ -36,7 +36,7 @@
               <div class="message my-message">
                 <canvas id="myChart"></canvas>
               </div>
-            </li>
+            </li> -->
             
           </ul>
           
@@ -60,8 +60,7 @@
           <span class="message-data-time">10:12 AM, Today</span>
         </div>
         <div class="message my-message">
-          How may I help you!
-          <canvas id="myChart"></canvas>
+          <canvas id="myChart" style="display: block; height: 155px; width: 311px;" width="622" height="310"></canvas>
         </div>
       </li>
 
@@ -94,72 +93,6 @@
     <script type="text/javascript">
       var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
       // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-      var ctx = document.getElementById('myChart').getContext('2d');
-      // var chart = new Chart(ctx, {
-      //     // The type of chart we want to create
-      //     type: 'line',
-
-      //     // The data for our dataset
-      //     data: {
-      //         labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August'],
-      //         datasets: [{
-      //             label: 'My First dataset',
-      //             backgroundColor: 'rgb(255, 99, 132)',
-      //             borderColor: 'rgb(255, 99, 132)',
-      //             data: [0, 10, 5, 2, 20, 30, 45, 100]
-      //         }]
-      //     },
-
-      //     // Configuration options go here
-      //     options: {}
-      // });
-
-      // var myPieChart = new Chart(ctx, {
-      //     type: 'pie',
-      //     data: {
-      //       datasets: [{
-      //           data: [10, 20, 30],
-      //           backgroundColor: 'rgb(255, 99, 132)',
-      //       }],
-
-      //       // These labels appear in the legend and in the tooltips when hovering different arcs
-      //       labels: [
-      //           'Red',
-      //           'Yellow',
-      //           'Blue'
-      //       ]
-      //     },
-      //     options: {}
-      // });
-
-      var stackedBar = new Chart(ctx, {
-          type: 'line',
-          data: {
-            datasets: [{
-                data: [10000, 20000, 300],
-                backgroundColor: 'rgb(255, 99, 132)',
-            }],
-
-            // These labels appear in the legend and in the tooltips when hovering different arcs
-            labels: [
-                'Red',
-                'Yellow',
-                'Blue'
-            ]
-          },
-          options: {
-              scales: {
-                  xAxes: [{
-                      stacked: true
-                  }],
-                  yAxes: [{
-                      stacked: true
-                  }]
-              }
-          }
-      });
-
-
       socket.on( 'connect', function() {
         socket.emit( 'my event', {
           data: 'User Connected'
@@ -191,35 +124,32 @@
               newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
               var ctx = document.getElementById('myChart').getContext('2d');
               var stackedBar = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                  datasets: [{
-                      // data: [10000, 20000, 300],
-                      data: msg.data.slice(msg.data.length - 10, msg.data.length - 1),
-                      backgroundColor: 'rgb(255, 99, 132)',
-                  }],
+                  type: 'line',
+                  data: {
+                    datasets: [{
+                        label: msg.message,
+                        data: msg.data,
+                        backgroundColor: 'rgb(255, 99, 132)',
+                    }],
 
-                  // // These labels appear in the legend and in the tooltips when hovering different arcs
-                  // labels: [
-                  //     'Math',
-                  //     'Science',
-                  //     'English'
-                  // ]
-                  label: msg.labels.slice(msg.data.length - 10, msg.data.length - 1)
-                },
-                options: {
-                    scales: {
-                        xAxes: [{
-                            stacked: true
-                        }],
-                        yAxes: [{
-                            stacked: true
-                        }]
-                    }
-                }
-            });
-              var canvas = $("#myChart")
-              canvas.attr('id', 'whatever')
+                    // These labels appear in the legend and in the tooltips when hovering different arcs
+                    labels: msg.labels
+                  },
+                  options: {
+                      scales: {
+                          xAxes: [{
+                              stacked: true
+                          }],
+                          yAxes: [{
+                              stacked: true
+                          }]
+                      }
+                  }
+              });
+              var canvas = document.getElementById('myChart')
+              canvas.id = 'whatever'
+              msg.data = []
+              msg.labels = []
               newDiv.show()
             }
             else {
