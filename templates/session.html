@@ -92,8 +92,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script type="text/javascript">
-      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
-      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
+      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
       var ctx = document.getElementById('myChart').getContext('2d');
       // var chart = new Chart(ctx, {
       //     // The type of chart we want to create
@@ -223,7 +223,6 @@
               newDiv.show()
             }
             else {
-              newDiv.show()
               var newDiv = $("#message_bot").clone();
               newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
               newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
