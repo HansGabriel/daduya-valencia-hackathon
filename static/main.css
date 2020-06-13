@@ -191,13 +191,4 @@ body {
   clear: both;
   height: 0;
 }
-
-#message_bot_image img {
-  width: 20em;
-  margin-bottom: 30px;
-}
-
-#message_bot_image .my-message {
-  margin-bottom: 0;
-}
 /*# sourceMappingURL=main.css.map */

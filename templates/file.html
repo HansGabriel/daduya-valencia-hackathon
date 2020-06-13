@@ -2,44 +2,177 @@
   <html lang="en">
   <head>
     <title>Flask_Chat_App</title>
+    <link rel="stylesheet" href="../static/main.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
   <body>
+        <div class="chat">
+          <div class="chat-header clearfix">
+            <img src="https://s3.ap-south-1.amazonaws.com/techleer/230.jpg" alt="avatar" />
+          
+          <div class="chat-about">
+            <div class="chat-with">Covid Chat Bot</div>
+            <div class="chat-num-messages">Ask me anything related to covid data</div>
+          </div>
+          <i class="fa fa-star"></i>
+        </div> <!-- end chat-header -->
+        
+        <div class="chat-history">
+          <ul id="unl">
+            <li>
+              <div class="message-data">
+                <span class="message-data-name"><i class="fa fa-circle online"></i> Covid Bot</span>
+                <span class="message-data-time">10:12 AM, Today</span>
+              </div>
+              <div class="message my-message">
+                How may I help you!
+              </div>
+            </li>
+            
+          </ul>
+          
+        </div> <!-- end chat-history -->
+        
+        <form action="" method='POST'>
+          <div class="chat-message clearfix">
+            <textarea name="message-to-send" id="message-to-send" placeholder ="Type your message" rows="3"></textarea>
+            <!-- <i class="fa fa-microphone" id="recordButton" aria-hidden="true" style="font-size: 1.5em; margin-left: 60%;"></i>
+            <i class="fa fa-microphone-slash" id="stopButton" aria-hidden="true" style="font-size: 1.5em; margin-left: 10%;"></i> -->
+            <button>Send</button>
+          </div>
+        </form>
+      </div>
 
-    <h3 style='color: #ccc;font-size: 30px;'>No message yet..</h3>
-    <div class="message_holder"></div>
+      <li style="display:none" id="graph_bot"> 
+        <div class="message-data">
+          <span class="message-data-name"><i class="fa fa-circle online"></i> Covid Bot</span>
+          <span class="message-data-time">10:12 AM, Today</span>
+        </div>
+        <div class="message my-message">
+          <canvas id="myChart" style="display: block; height: 155px; width: 311px;" width="622" height="310"></canvas>
+        </div>
+      </li>
 
-    <form action="" method="POST">
-      <input type="text" class="username" placeholder="User Name"/>
-      <input type="text" class="message" placeholder="Messages"/>
-      <input type="submit"/>
-    </form>
+      <li class="clearfix" id='message_human' style="display:none">
+        <div class="message-data align-right">
+          <span class="message-data-time" >10:14 AM, Today</span> &nbsp; &nbsp;
+          <span class="message-data-name" >Olia</span> <i class="fa fa-circle me"></i>
+          
+        </div>
+        <div class="message other-message float-right">
+          Well I am not sure. The rest of the team is not here yet. Maybe in an hour or so? Have you faced any problems at the last phase of the project?
+        </div>
+      </li>
+        
+      <li id='message_bot' style="display:none">
+        <div class="message-data">
+          <span class="message-data-name"><i class="fa fa-circle online"></i> Covid Bot</span>
+          <span class="message-data-time">10:12 AM, Today</span>
+        </div>
+        <div class="message my-message">
+          Are we meeting today? Project has been already finished and I have results to show you.
+        </div>
+      </li>
+    
+      <div style="max-width: 28em;">
+        <p>Convert recorded audio to:</p>
+        <select id="encodingTypeSelect">
+          <option value="wav">Waveform Audio (.wav)</option>
+          <option value="mp3">MP3 (MPEG-1 Audio Layer III) (.mp3)</option>
+          <option value="ogg">Ogg Vorbis (.ogg)</option>
+        </select>
+        <div id="controls">
+          <button id="recordButton">Record</button>
+          <button id="stopButton" disabled>Stop</button>
+        </div>
+        <div id="formats"></div>
+        <pre>Log</pre>
+        <pre id="log"></pre>
+    
+        <pre>Recordings</pre>
+        <ol id="recordingsList"></ol>
+      </div>
+      
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/app.js') }}"></script>
     <script type="text/javascript">
-      var socket = io.connect('https://' + document.domain + ':' + location.port, {transports: ['websocket']});
-
+      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
+      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
       socket.on( 'connect', function() {
         socket.emit( 'my event', {
           data: 'User Connected'
         } )
         var form = $( 'form' ).on( 'submit', function( e ) {
           e.preventDefault()
-          let user_name = $( 'input.username' ).val()
-          let user_input = $( 'input.message' ).val()
+          if ($('#message-to-send').val().length == 0) {
+            $( 'textarea' ).val( '' ).focus()
+            return;
+          }
+          let user_name = "Hans"
+          let user_input = $( 'textarea' ).val()
+          console.log(user_input)
           socket.emit( 'my event', {
             user_name : user_name,
-            message : user_input
+            message : user_input,
+            data: "message"
           } )
-          $( 'input.message' ).val( '' ).focus()
+          $( 'textarea' ).val( '' ).focus()
         } )
       } )
       socket.on( 'my response', function( msg ) {
         console.log( msg )
         if( typeof msg.user_name !== 'undefined' ) {
-          $( 'h3' ).remove()
-          $( 'div.message_holder' ).append( '<div><b style="color: #000">'+msg.user_name+'</b> '+msg.message+'</div>' )
+          if (msg.user_name === "Steve") {
+            if (msg.data.length > 0) {
+              var newDiv = $("#graph_bot").clone();
+              newDiv.attr("id","whatever").appendTo('ul')
+              newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
+              var ctx = document.getElementById('myChart').getContext('2d');
+              var stackedBar = new Chart(ctx, {
+                  type: 'line',
+                  data: {
+                    datasets: [{
+                        label: msg.message,
+                        data: msg.data,
+                        backgroundColor: 'rgb(255, 99, 132)',
+                    }],
+
+                    // These labels appear in the legend and in the tooltips when hovering different arcs
+                    labels: msg.labels
+                  },
+                  options: {
+                      scales: {
+                          xAxes: [{
+                              stacked: true
+                          }],
+                          yAxes: [{
+                              stacked: true
+                          }]
+                      }
+                  }
+              });
+              var canvas = document.getElementById('myChart')
+              canvas.id = 'whatever'
+              msg.data = []
+              msg.labels = []
+              newDiv.show()
+            }
+            else {
+              var newDiv = $("#message_bot").clone();
+              newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
+              newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
+              newDiv.show()
+            }
+          } else {
+            var newDiv = $("#message_human").clone();
+            newDiv.attr("id","whatever").appendTo('ul').find(".other-message").html(msg.message);
+            newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
+            newDiv.show()
+          }
         }
       })
     </script>

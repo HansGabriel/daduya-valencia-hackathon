@@ -3,6 +3,7 @@
   <head>
     <title>Flask_Chat_App</title>
     <link rel="stylesheet" href="../static/main.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
   <body>
         <div class="chat">
@@ -27,16 +28,6 @@
                 How may I help you!
               </div>
             </li>
-
-            <!-- <li>
-              <div class="message-data">
-                <span class="message-data-name"><i class="fa fa-circle online"></i> Covid Bot</span>
-                <span class="message-data-time">10:12 AM, Today</span>
-              </div>
-              <div class="message my-message">
-                <canvas id="myChart"></canvas>
-              </div>
-            </li> -->
             
           </ul>
           
@@ -45,14 +36,21 @@
         <form action="" method='POST'>
           <div class="chat-message clearfix">
             <textarea name="message-to-send" id="message-to-send" placeholder ="Type your message" rows="3"></textarea>
-                    
-            <i class="fa fa-file-o"></i> &nbsp;&nbsp;&nbsp;
-            <i class="fa fa-file-image-o"></i>
-            
+            <!-- <i class="fa fa-microphone" id="recordButton" aria-hidden="true" style="font-size: 1.5em; margin-left: 60%;"></i>
+            <i class="fa fa-microphone-slash" id="stopButton" aria-hidden="true" style="font-size: 1.5em; margin-left: 10%;"></i> -->
             <button>Send</button>
           </div>
         </form>
       </div>
+
+      <div id="controls">
+        <button id="recordButton">Record</button>
+        <button id="pauseButton" disabled>Pause</button>
+        <button id="stopButton" disabled>Stop</button>
+       </div>
+       <div id="formats">Format: start recording to see sample rate</div>
+       <p><strong>Recordings:</strong></p>
+       <ol id="recordingsList"></ol>
 
       <li style="display:none" id="graph_bot"> 
         <div class="message-data">
@@ -90,9 +88,11 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
     <script type="text/javascript">
-      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
-      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
+      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
       socket.on( 'connect', function() {
         socket.emit( 'my event', {
           data: 'User Connected'
@@ -167,7 +167,5 @@
         }
       })
     </script>
-    <!-- <script src="../js/index.js"></script> -->
-
   </body>
   </html>

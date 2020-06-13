@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO
 from wit import Wit
 from difflib import SequenceMatcher
@@ -7,8 +7,8 @@ import requests
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
-socketio = SocketIO(app, cors_allowed_origins='*')
-# socketio = SocketIO(app)
+# socketio = SocketIO(app, cors_allowed_origins='*')
+socketio = SocketIO(app)
 client = Wit("2XWTIKVOL6RTJLGCQQ7OXDG6YQVBCTMH")
 
 def messageReceived(methods=['GET', 'POST']):
@@ -146,6 +146,105 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
                     status = "deaths"
             msg["message"] = "Total " + status + " in " + slug
         socketio.emit('my response', msg, callback=messageReceived)
+
+@app.route('/audio', methods=['GET', 'POST'])
+def audio():
+    if request.method == "POST":
+        msg = {"user_name": "", "message": "", "data": [], "labels": []}
+        f = request.files['audio_data']
+        filePath = "./file.wav"
+        f.save(filePath)
+        resp = None
+        with open('file.wav', 'rb') as f:
+            resp = client.speech(f, {'Content-Type': 'audio/wav'})
+        print(resp)
+        if resp['intents'][0]['name'] == "greeting":
+            msg["user_name"] = "Steve"
+            msg["message"] = "Hello there Human"
+        elif resp['intents'][0]['name'] == "bye":
+            msg["user_name"] = "Steve"
+            msg["message"] = "Good bye, see you next time"
+        elif resp['intents'][0]['name'] == "infected_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of new confirmed cases in " + ans["Country"] + " is " + str(ans["NewConfirmed"])
+
+        elif resp['intents'][0]['name'] == "dead_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of new confirmed deaths in " + ans["Country"] + " is " + str(ans["NewDeaths"])
+
+        elif resp['intents'][0]['name'] == "recoveries_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of new confirmed recoveries in " + ans["Country"] + " is " + str(ans["NewRecovered"])
+
+        elif resp['intents'][0]['name'] == "infected_total_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of total confirmed infected cases in " + ans["Country"] + " is " + str(ans["TotalConfirmed"])
+        elif resp['intents'][0]['name'] == "dead_total_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of total confirmed dead cases in " + ans["Country"] + " is " + str(ans["TotalDeaths"])
+        elif resp['intents'][0]['name'] == "recoveries_total_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            msg["message"] = "The number of total confirmed recovered cases in " + ans["Country"] + " is " + str(ans["TotalRecovered"])
+        elif resp['intents'][0]['name'] == "graph_get":
+            msg["user_name"] = "Steve"
+            data = get("https://api.covid19api.com/summary")
+            arr = data["Countries"]
+            ans = matchinCountry2(resp['entities']['country:country'][0]['value'], arr)
+            slug = ans["Slug"]
+            print(slug)
+            timedata = get("https://api.covid19api.com/dayone/country/" + slug)
+            status = ""
+            if 'status:Recovered' in resp['entities']:
+                i = 0
+                while i < len(timedata):
+                    msg["data"].append(timedata[i]['Recovered'])
+                    date = timedata[i]['Date']
+                    month = numToMonth(date[5:7])
+                    day = date[8:10]
+                    msg["labels"].append(str(month) + " " + str(day))
+                    i+=10
+                    status = "recoveries"
+            elif 'status:Confirmed' in resp['entities']:
+                i = 0
+                while i < len(timedata):
+                    msg["data"].append(timedata[i]['Confirmed'])
+                    date = timedata[i]['Date']
+                    month = numToMonth(date[5:7])
+                    day = date[8:10]
+                    msg["labels"].append(str(month) + " " + str(day))
+                    i+=10
+                    status = "infected"
+            elif 'status:Deaths' in resp['entities']:
+                i = 0
+                while i < len(timedata):
+                    msg["data"].append(timedata[i]['Deaths'])
+                    date = timedata[i]['Date']
+                    month = numToMonth(date[5:7])
+                    day = date[8:10]
+                    msg["labels"].append(str(month) + " " + str(day))
+                    i+=10
+                    status = "deaths"
+            msg["message"] = "Total " + status + " in " + slug
+
+        return jsonify(msg)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
