@@ -7,8 +7,8 @@ import requests
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
-# socketio = SocketIO(app, cors_allowed_origins='*')
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins='*')
+# socketio = SocketIO(app)
 client = Wit("2XWTIKVOL6RTJLGCQQ7OXDG6YQVBCTMH")
 
 def messageReceived(methods=['GET', 'POST']):
