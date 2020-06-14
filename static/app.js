@@ -1,4 +1,4 @@
-console.log('hello')
+console.log('wow')
 //webkitURL is deprecated but nevertheless
 URL = window.URL || window.webkitURL;
 
@@ -120,7 +120,11 @@ function createDownloadLink(blob) {
 
     var url = URL.createObjectURL(blob);
     var au = document.createElement('audio');
-    var li = document.createElement('li');
+    // var li = document.createElement('li');
+    var list = document.getElementById('audio_human')
+    var li = list.cloneNode(true);
+
+    li.setAttribute("id", "whatever");
 
     //name of .wav file to use during upload and download (without extendion)
     var filename = new Date().toISOString();
@@ -128,10 +132,14 @@ function createDownloadLink(blob) {
     //add controls to the <audio> element
     au.controls = true;
     au.src = url;
+    au.setAttribute("class", "float-right");
 
 
     //add the new audio element to li
     li.appendChild(au);
+
+    var date = li.querySelector(".message-data-time");
+    date.innerHTML = new Date().toLocaleTimeString();
 
     //add the filename to the li
     // li.appendChild(document.createTextNode(filename+".wav "))
@@ -140,12 +148,64 @@ function createDownloadLink(blob) {
     xhr.onload=function(e) {
         if(this.readyState === 4) {
             console.log("Server returned: ",e.target.response);
-            res = e.target.response
-            console.log(res)
+            msg = e.target.response
+            console.log(msg)
+            console.log(msg.user_name)
+            if( typeof msg.user_name !== 'undefined' ) {
+                if (msg.user_name === "Steve") {
+                  if (msg.data.length > 0) {
+                    var newDiv = $("#graph_bot").clone();
+                    newDiv.attr("id","whatever").appendTo('ul')
+                    newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
+                    var ctx = document.getElementById('myChart').getContext('2d');
+                    var stackedBar = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                          datasets: [{
+                              label: msg.message,
+                              data: msg.data,
+                              backgroundColor: 'rgb(255, 99, 132)',
+                          }],
+      
+                          // These labels appear in the legend and in the tooltips when hovering different arcs
+                          labels: msg.labels
+                        },
+                        options: {
+                            scales: {
+                                xAxes: [{
+                                    stacked: true
+                                }],
+                                yAxes: [{
+                                    stacked: true
+                                }]
+                            }
+                        }
+                    });
+                    var canvas = document.getElementById('myChart')
+                    canvas.id = 'whatever'
+                    msg.data = []
+                    msg.labels = []
+                    newDiv.show()
+                  }
+                  else {
+                    var newDiv = $("#message_bot").clone();
+                    newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
+                    newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
+                    newDiv.show()
+                  }
+                } else {
+                  var newDiv = $("#message_human").clone();
+                  newDiv.attr("id","whatever").appendTo('ul').find(".other-message").html(msg.message);
+                  newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
+                  newDiv.show()
+                }
+            }
         }
+
     };
     var fd=new FormData();
     fd.append("audio_data",blob, filename);
+    xhr.responseType = 'json';
     xhr.open("POST","/audio",true);
     xhr.send(fd);
 
@@ -171,5 +231,7 @@ function createDownloadLink(blob) {
     // li.appendChild(upload)//add the upload link to li
 
     //add the li element to the ol
-    recordingsList.appendChild(li);
+    // recordingsList.appendChild(li);
+    li.style.display = 'block';
+    unl.appendChild(li);
 }
