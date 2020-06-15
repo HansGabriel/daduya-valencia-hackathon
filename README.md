@@ -1,5 +1,5 @@
 # Covid Chat Bot
-A A.I. that will answer questions related to covid 19 data and information. Visit the working demo below.
+An A.I. that will answer questions related to covid 19 data and information. Visit the working demo below.
 
 ![Main][Main_Page]
 
