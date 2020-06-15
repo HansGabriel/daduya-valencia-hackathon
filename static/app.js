@@ -37,6 +37,13 @@ function startRecording() {
     stopButton.disabled = false;
     pauseButton.disabled = false
 
+    recordButton.style.display = 'none';
+    stopButton.style.display = 'inline-block';
+    recordButton.style.display = '-5%';
+    stopButton.style.marginLeft = '75%';
+    stopButton.style.marginRight = '0%';
+
+
     /*
         We're using the standard promise based getUserMedia() 
         https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
@@ -102,6 +109,13 @@ function stopRecording() {
     stopButton.disabled = true;
     recordButton.disabled = false;
     pauseButton.disabled = true;
+
+
+    recordButton.style.display = 'inline-block';
+    stopButton.style.display = 'none';
+    recordButton.style.display = '75%';
+    stopButton.style.marginLeft = '-5%';
+    recordButton.style.marginRight = '0%';
 
     //reset button just in case the recording is stopped while paused
     pauseButton.innerHTML="Pause";
@@ -186,18 +200,21 @@ function createDownloadLink(blob) {
                     msg.data = []
                     msg.labels = []
                     newDiv.show()
+                    responsiveVoice.speak(msg.message);
                   }
                   else {
                     var newDiv = $("#message_bot").clone();
                     newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
                     newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
                     newDiv.show()
+                    responsiveVoice.speak(msg.message);
                   }
                 } else {
                   var newDiv = $("#message_human").clone();
                   newDiv.attr("id","whatever").appendTo('ul').find(".other-message").html(msg.message);
                   newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
                   newDiv.show()
+                  
                 }
             }
         }

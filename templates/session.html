@@ -36,8 +36,8 @@
         <form action="" method='POST'>
           <div class="chat-message clearfix">
             <textarea name="message-to-send" id="message-to-send" placeholder ="Type your message" rows="3"></textarea>
-            <i class="fa fa-microphone" id="recordButton" aria-hidden="true" style="font-size: 1.5em; margin-left: 60%;"></i>
-            <i class="fa fa-microphone-slash" id="stopButton" aria-hidden="true" style="font-size: 1.5em; margin-left: 10%;"></i>
+            <i class="fa fa-microphone" id="recordButton" aria-hidden="true" style="font-size: 1.5em; margin-left: 75%;"></i>
+            <i class="fa fa-microphone-slash" id="stopButton" aria-hidden="true" style="font-size: 1.5em; margin-left: -5%;display:none;" disabled ></i>
             <button>Send</button>
           </div>
         </form>
@@ -62,10 +62,10 @@
         </div>
       </li>
 
-      <li class="clearfix" id='audio_human'>
+      <li class="clearfix" id='audio_human' style="display:none;">
         <div class="message-data align-right">
           <span class="message-data-time" >10:14 AM, Today</span> &nbsp; &nbsp;
-          <span class="message-data-name" >Olia</span> <i class="fa fa-circle me"></i>
+          <span class="message-data-name" >Human</span> <i class="fa fa-circle me"></i>
           
         </div>
       </li>
@@ -73,7 +73,7 @@
       <li class="clearfix" id='message_human' style="display:none">
         <div class="message-data align-right">
           <span class="message-data-time" >10:14 AM, Today</span> &nbsp; &nbsp;
-          <span class="message-data-name" >Olia</span> <i class="fa fa-circle me"></i>
+          <span class="message-data-name" >Human</span> <i class="fa fa-circle me"></i>
           
         </div>
         <div class="message other-message float-right">
@@ -97,10 +97,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=r72iqcEV"></script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
     <script type="text/javascript">
-      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
-      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+      var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port, {'transports': ['websocket']});
+      // var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
       socket.on( 'connect', function() {
         socket.emit( 'my event', {
           data: 'User Connected'
@@ -159,12 +160,14 @@
               msg.data = []
               msg.labels = []
               newDiv.show()
+              responsiveVoice.speak(msg.message);
             }
             else {
               var newDiv = $("#message_bot").clone();
               newDiv.attr("id","whatever").appendTo('ul').find(".my-message").html(msg.message);
               newDiv.find(".message-data-time").html(new Date().toLocaleTimeString());
               newDiv.show()
+              responsiveVoice.speak(msg.message);
             }
           } else {
             var newDiv = $("#message_human").clone();

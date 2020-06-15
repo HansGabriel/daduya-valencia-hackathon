@@ -7,8 +7,8 @@ import requests
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
-# socketio = SocketIO(app, cors_allowed_origins='*')
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins='*')
+# socketio = SocketIO(app)
 client = Wit("2XWTIKVOL6RTJLGCQQ7OXDG6YQVBCTMH")
 
 def messageReceived(methods=['GET', 'POST']):
@@ -145,6 +145,18 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
                     i+=10
                     status = "deaths"
             msg["message"] = "Total " + status + " in " + slug
+        elif resp['intents'][0]['name'] == "identity_get":
+            msg["user_name"] = "Steve"
+            msg["message"] = "I am a covid chat bot and I can give you information related to covid 19"
+        elif resp['intents'][0]['name'] == "symptoms_get":
+            msg["user_name"] = "Steve"
+            msg["message"] = "Most common symptoms are fever, dry cough, and tiredness"
+        elif resp['intents'][0]['name'] == "sick_get":
+            msg["user_name"] = "Steve"
+            msg["message"] = "If you feel sick you should rest, drink plenty of fluid, and eat nutritious food. Stay in a separate room from other family members, and use a dedicated bathroom if possible. Clean and disinfect frequently touched surfaces. Seek medical care if you have a fever, a cough, and difficulty breathing. Call in advance."
+        elif resp['intents'][0]['name'] == "prevent_get":
+            msg["user_name"] = "Steve"
+            msg["message"] = "Here are my 5 tips: STAY home as much as you can, KEEP a safe distance, WASH hands often, COVER your cough, SICK? Call ahead"
         socketio.emit('my response', msg, callback=messageReceived)
 
 @app.route('/audio', methods=['GET', 'POST'])
@@ -243,7 +255,18 @@ def audio():
                     i+=10
                     status = "deaths"
             msg["message"] = "Total " + status + " in " + slug
-
+        elif resp['intents'][0]['name'] == "identity_get":
+            msg["user_name"] = "Steve"
+            msg["message"] = "I am a covid chat bot and I can give you information related to covid 19"
+        elif resp['intents'][0]['name'] == "symptoms_get":
+            msg["user_name"] = "Steve"
+            msg["message"] = "Most common symptoms are fever, dry cough, and tiredness"
+        elif resp['intents'][0]['name'] == "sick_get":
+            msg["user_name"] = "Steve"
+            msg["message"] = "If you feel sick you should rest, drink plenty of fluid, and eat nutritious food. Stay in a separate room from other family members, and use a dedicated bathroom if possible. Clean and disinfect frequently touched surfaces. Seek medical care if you have a fever, a cough, and difficulty breathing. Call in advance."
+        elif resp['intents'][0]['name'] == "prevent_get":
+            msg["user_name"] = "Steve"
+            msg["message"] = "Here are my 5 tips: STAY home as much as you can, KEEP a safe distance, WASH hands often, COVER your cough, SICK? Call ahead"
         return msg
 
 if __name__ == '__main__':
