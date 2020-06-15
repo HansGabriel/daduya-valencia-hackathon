@@ -47,7 +47,7 @@ Examples of getting these sentences:
 
 2.) **Getting graphs of deaths, infected, and recoveries per country**
 
-![Graph][Graph]
+![GraphData][GraphData]
 
 Examples of getting these sentences:
 
@@ -57,7 +57,7 @@ Examples of getting these sentences:
 
 3.) **Using Audio**
 
-![Audio][Audio]
+![AudioData][AudioData]
 
 You can press the recorder icon to start recording and press again to end. The same answers will be the A.I.'s response depending on your sentence.
 
@@ -81,7 +81,7 @@ You can press the recorder icon to start recording and press again to end. The s
 https://raw.githubusercontent.com/HansGabriel/daduya-valencia-hackathon/master/images/main.png
 [Message]:
 https://raw.githubusercontent.com/HansGabriel/daduya-valencia-hackathon/master/images/message.png
-[Graph]:
+[GraphData]:
 https://raw.githubusercontent.com/HansGabriel/daduya-valencia-hackathon/master/images/graph.png
-[Audio]:
+[AudioData]:
 https://raw.githubusercontent.com/HansGabriel/daduya-valencia-hackathon/master/images/audio.png
